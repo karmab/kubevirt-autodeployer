@@ -1,0 +1,3 @@
+packer-build-manifest-gcp.json
+build.log
+gce_googlecompute.pem

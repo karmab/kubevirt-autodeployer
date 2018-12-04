@@ -1,0 +1,15 @@
+# Packer build
+#export GOOGLE_APPLICATION_CREDENTIALS=""
+export GCP_SSH_PUBLIC_KEY=~/.ssh/id_rsa.pub
+export SERVICE_ACCOUNT_EMAIL=karimb@cnvlab-209908.iam.gserviceaccount.com
+export IMAGE_NAME=kubevirt-button
+export MACHINE_TYPE=custom-2-8192
+export PROJECT_ID=cnvlab-209908
+export ZONE=us-central1-b
+export DISK_SIZE=30
+export PACKER=`which packer`
+export PACKER_BUILD_TEMPLATE=kubevirt-gcp-centos.json
+export PLAYBOOK=gcp-test-centos.yml
+export PLAYBOOK_CLEANUP=gcp-test-centos-cleanup.yml
+export PLAYBOOK_DEPLOY=gcp-image-publish.yml
+export BUILD_SCRIPT=./build.sh

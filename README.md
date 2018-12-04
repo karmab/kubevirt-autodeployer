@@ -17,6 +17,11 @@ Alternatively, the following metadata can be provided in GCP to override version
 
 ## Building the image for GCP
 
+you need 
+
+- packer
+- gcp credentials set
+
 ```
 sh build.sh
 ```

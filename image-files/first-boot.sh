@@ -5,7 +5,7 @@ URL="http://metadata/computeMetadata/v1/instance/attributes/"
 HEADER="X-Google-Metadata-Request: True"
 
 wget -P /tmp/ https://raw.githubusercontent.com/karmab/kubevirt-autodeployer/master/versions.sh
-source /tmp/version.sh
+source /tmp/versions.sh
 
 wget -O - $URL/k8s_version --header="$HEADER" > /tmp/x && K8S=`cat /tmp/x`
 if [ "$?" == "0" ] ; then 

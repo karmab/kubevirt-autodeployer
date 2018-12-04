@@ -37,20 +37,13 @@
         "mv image-files/* .",
         "rmdir image-files",
         "sudo mv /home/centos/kubevirt-installer.service /usr/lib/systemd/system/",
-        "sudo mv /home/centos/first-boot-centos.sh /usr/local/bin/first-boot.sh",
+        "sudo mv /home/centos/first-boot-centos.sh /usr/local/bin/",
         "sudo mv /home/centos/kubernetes.repo /etc/yum.repos.d",
         "sudo systemctl daemon-reload",
         "sudo systemctl enable kubevirt-installer",
-        "sudo yum install -y ansible docker jq bind-utils bind-libs cockpit wget git",
+        "sudo yum install -y docker jq bind-utils bind-libs wget git",
         "sudo yum update -y"
       ]
-    }
-  ],
-  "post-processors": [
-    {
-      "type": "manifest",
-      "output": "packer-build-manifest-gcp.json",
-      "strip_path": true
     }
   ]
 }

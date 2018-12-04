@@ -18,7 +18,6 @@ Alternatively, the following metadata can be provided in GCP to override version
 ## Building the image for GCP
 
 ```
-source environment.gcp
 sh build.sh
 ```
 

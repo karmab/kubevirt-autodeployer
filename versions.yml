@@ -1,4 +1,0 @@
-k8s: "1.13.0"
-flannel: "v0.10.0"
-kubevirt: "v0.10.0"
-cdi: "v1.4.0"

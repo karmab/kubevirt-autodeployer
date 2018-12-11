@@ -11,7 +11,7 @@ wget -O - $URL/k8s_version --header="$HEADER" > /tmp/x && K8S=`cat /tmp/x`
 if [ "$?" == "0" ] ; then 
   K8S=`cat /tmp/x`
   if [ "$K8S" == 'latest' ] ; then
-    K8S=`curl -s https://api.github.com/repos/kubernetes/kubernetes/releases/latest| jq -r .tag_name | sed -i 's/v/-/'`
+    K8S=`curl -s https://api.github.com/repos/kubernetes/kubernetes/releases/latest| jq -r .tag_name | sed 's/v//'`
   fi
   if [ "`echo $K8S | tr -cd '.' | wc -c`" == "1" ] ; then
     K8S=$K8S.0
@@ -81,12 +81,35 @@ kubectl create clusterrolebinding kubernetes-dashboard-head --clusterrole=cluste
 
 # deploy kubevirt 
 yum -y install xorg-x11-xauth virt-viewer wget
-kubectl config set-context `kubectl config current-context` --namespace=kube-system
-grep -q vmx /proc/cpuinfo || kubectl create configmap -n kube-system kubevirt-config --from-literal debug.useEmulation=true
-kubectl apply -f https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT}/kubevirt.yaml
-wget https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT}/virtctl-${KUBEVIRT}-linux-amd64
-mv virtctl-${KUBEVIRT}-linux-amd64 /usr/bin/virtctl
-chmod u+x /usr/bin/virtctl
+kubectl create ns kubevirt
+grep -q vmx /proc/cpuinfo || oc create configmap -n kubevirt kubevirt-config
+grep -q vmx /proc/cpuinfo || oc create configmap -n kube-system kubevirt-config
+if [ "$KUBEVIRT" == 'master' ] || [ "$KUBEVIRT" -eq "$KUBEVIRT" ] ; then
+  kubectl create ns kubevirt
+  yum -y install git make
+  cd /root
+  git clone https://github.com/kubevirt/kubevirt
+  cd kubevirt
+  export KUBEVIRT_PROVIDER=k8s-$K8S
+  export KUBEVIRT_PROVIDER=external
+  if [ "$KUBEVIRT" -eq "$KUBEVIRT" ] ; then
+    git fetch origin refs/pull/$KUBEVIRT/head:pull_$KUBEVIRT
+    git checkout pull_$KUBEVIRT
+  fi
+  source hack/config-default.sh
+  sed -i "s/\$docker_prefix/kubevirt/" hack/*sh
+  sed -i "s/\${docker_prefix}/kubevirt/" hack/*sh
+  make cluster-up
+  make docker manifests
+  sed -i "s/latest/devel/" _out/manifests/release/kubevirt.yaml
+  kubectl create -f _out/manifests/release/kubevirt.yaml
+else
+  wget https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT}/kubevirt.yaml
+  kubectl create -f kubevirt.yaml --validate=false
+  wget https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT}/virtctl-${KUBEVIRT}-linux-amd64
+  mv virtctl-${KUBEVIRT}-linux-amd64 /usr/bin/virtctl
+  chmod u+x /usr/bin/virtctl
+fi
 
 # deploy cdi
 kubectl create ns golden

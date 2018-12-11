@@ -43,6 +43,11 @@ if [ "$?" == "0" ] ; then
   fi
 fi
 
+wget -O - $URL/kubevirt_ui_version --header="$HEADER" > /tmp/x
+if [ "$?" == "0" ] ; then 
+  KUBEVIRT_UI=`cat /tmp/x`
+fi
+
 # make sure we use a weave network that doesnt conflict
 # for num in `seq 30 50` ; do
 # ip r | grep -q 172.$num
@@ -123,15 +128,18 @@ kubectl expose svc cdi-uploadproxy -n golden
 # deploy kubevirt ui
 kubectl create namespace kweb-ui
 kubectl create clusterrolebinding kweb-ui --clusterrole=edit --user=system:serviceaccount:kweb-ui:default
-kubectl apply -f https://gist.githubusercontent.com/karmab/1ed94b351ad9728979ba1f4a6dd91e0f/raw/08d15b174a2782c365d8b52ff6323c771e0a50e8/ui.yml -n kweb-ui
+sed -i "s/KUBEVIRT_UI/$KUBEVIRT_UI/" /root/ui.yml
+kubectl apply -f /root/ui.yml -n kweb-ui
 
 # set default context
 kubectl config set-context `kubectl config current-context` --namespace=default
 
 # generate motd
-# cd /home/centos
-# sudo ansible-playbook motd.yml -v
-# rm motd*
+sed -i "s/K8S/$K8S/" /etc/motd
+sed -i "s/FLANNEL/$FLANNEL/" /etc/motd
+sed -i "s/KUBEVIRT/$KUBEVIRT/" /etc/motd
+sed -i "s/UI/${KUBEVIRT_UI}/" /etc/motd
+sed -i "s/CDI/$CDI/" /etc/motd
 
 # disable the service so it only runs the first time the VM boots
 sudo chkconfig kubevirt-installer off

@@ -1,4 +1,5 @@
 K8S=1.13.0
 FLANNEL=master
 KUBEVIRT=v0.11.0
+KUBEVIRT_UI=latest
 CDI=v1.4.1

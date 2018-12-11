@@ -1,0 +1,15 @@
+Welcome to KubeVirt Auto Builder
+
+Kubernetes, KubeVirt and Cdi have been pre-installed for you. You may use
+the guide at http://kubevirt.io/labs/kubernetes.html to explore more.
+
+Found a problem? Please report it to
+https://github.com/karma/kubevirt-autobuilder/issues.
+
+Versions
+--------
+Kubernetes:    K8S
+Flannel:       FLANNEL
+KubeVirt:      KUBEVIRT
+KubeVirt Ui:   UI
+Cdi:           CDI

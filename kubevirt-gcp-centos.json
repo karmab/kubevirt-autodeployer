@@ -39,6 +39,8 @@
         "sudo mv /home/centos/kubevirt-installer.service /usr/lib/systemd/system/",
         "sudo mv /home/centos/first-boot.sh /usr/local/bin/",
         "sudo mv /home/centos/kubernetes.repo /etc/yum.repos.d",
+        "sudo mv /home/centos/motd /etc",
+        "sudo mv /home/centos/ui.yml /root",
         "sudo systemctl daemon-reload",
         "sudo systemctl enable kubevirt-installer",
         "sudo yum install -y docker jq bind-utils bind-libs wget git",

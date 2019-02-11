@@ -43,20 +43,6 @@ if [ "$?" == "0" ] ; then
   fi
 fi
 
-wget -O - $URL/kubevirt_ui_version --header="$HEADER" > /tmp/x
-if [ "$?" == "0" ] ; then 
-  KUBEVIRT_UI=`cat /tmp/x`
-fi
-
-# make sure we use a weave network that doesnt conflict
-# for num in `seq 30 50` ; do
-# ip r | grep -q 172.$num
-# if [ "$?" != "0" ] ; then
-#  WEAVENETWORK="172.30/172.$num/24"
-#  break
-# fi
-# done
-
 # deploy kubernetes
 echo net.bridge.bridge-nf-call-iptables=1 >> /etc/sysctl.d/99-sysctl.conf
 sysctl -p
@@ -88,7 +74,6 @@ kubectl create clusterrolebinding kubernetes-dashboard-head --clusterrole=cluste
 yum -y install xorg-x11-xauth virt-viewer wget
 kubectl create ns kubevirt
 grep -q vmx /proc/cpuinfo || oc create configmap -n kubevirt kubevirt-config
-grep -q vmx /proc/cpuinfo || oc create configmap -n kube-system kubevirt-config
 if [ "$KUBEVIRT" == 'master' ] || [ "$KUBEVIRT" -eq "$KUBEVIRT" ] ; then
   kubectl create ns kubevirt
   yum -y install git make
@@ -109,27 +94,26 @@ if [ "$KUBEVIRT" == 'master' ] || [ "$KUBEVIRT" -eq "$KUBEVIRT" ] ; then
   sed -i "s/latest/devel/" _out/manifests/release/kubevirt.yaml
   kubectl create -f _out/manifests/release/kubevirt.yaml
 else
-  wget https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT}/kubevirt.yaml
-  kubectl create -f kubevirt.yaml --validate=false
+  wget https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT}/kubevirt-operator.yaml
+  kubectl create -f kubevirt-operator.yaml
   wget https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT}/virtctl-${KUBEVIRT}-linux-amd64
   mv virtctl-${KUBEVIRT}-linux-amd64 /usr/bin/virtctl
   chmod u+x /usr/bin/virtctl
+  wget https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT}/kubevirt-cr.yaml
+  sleep 15
+  kubectl create -f kubevirt-cr.yaml
 fi
 
 # deploy cdi
 kubectl create ns golden
 kubectl create clusterrolebinding cdi --clusterrole=edit --user=system:serviceaccount:golden:default
 kubectl create clusterrolebinding cdi-apiserver --clusterrole=cluster-admin --user=system:serviceaccount:golden:cdi-apiserver
-wget https://github.com/kubevirt/containerized-data-importer/releases/download/${CDI}/cdi-controller.yaml
-sed -i "s/namespace:.*/namespace: golden/" cdi-controller.yaml
-kubectl apply -f cdi-controller.yaml -n golden
-kubectl expose svc cdi-uploadproxy -n golden
-
-# deploy kubevirt ui
-kubectl create namespace kweb-ui
-kubectl create clusterrolebinding kweb-ui --clusterrole=edit --user=system:serviceaccount:kweb-ui:default
-sed -i "s/KUBEVIRT_UI/$KUBEVIRT_UI/" /root/ui.yml
-kubectl apply -f /root/ui.yml -n kweb-ui
+wget https://github.com/kubevirt/containerized-data-importer/releases/download/${CDI}/cdi-operator.yaml
+kubectl apply -f cdi-operator.yaml
+sleep 15
+wget https://github.com/kubevirt/containerized-data-importer/releases/download/${CDI}/cdi-operator-cr.yaml
+kubectl create -f cdi-operator-cr.yaml
+kubectl expose svc cdi-uploadproxy
 
 # set default context
 kubectl config set-context `kubectl config current-context` --namespace=default
@@ -138,7 +122,6 @@ kubectl config set-context `kubectl config current-context` --namespace=default
 sed -i "s/K8S/$K8S/" /etc/motd
 sed -i "s/FLANNEL/$FLANNEL/" /etc/motd
 sed -i "s/KUBEVIRT/$KUBEVIRT/" /etc/motd
-sed -i "s/UI/${KUBEVIRT_UI}/" /etc/motd
 sed -i "s/CDI/$CDI/" /etc/motd
 
 # disable the service so it only runs the first time the VM boots

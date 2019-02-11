@@ -11,5 +11,4 @@ Versions
 Kubernetes:    K8S
 Flannel:       FLANNEL
 KubeVirt:      KUBEVIRT
-KubeVirt Ui:   UI
 Cdi:           CDI
